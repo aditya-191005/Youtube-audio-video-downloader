@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>YouTube A/V Downloader</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #030712;
+    }
+
+    /* --- Custom Themed Scrollbar --- */
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #1f2937; }
+    ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
+
+    /* --- Animated Mesh Gradient Background --- */
+    #background-mesh {
+        position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+        z-index: -1; overflow: hidden;
+    }
+    .blob {
+        position: absolute; border-radius: 50%;
+        filter: blur(100px);
+    }
+    .blob-1 { top: -20%; left: -20%; width: 500px; height: 500px; background: rgba(139, 92, 246, 0.2); animation: move 25s infinite alternate; }
+    .blob-2 { top: 60%; left: 70%; width: 400px; height: 400px; background: rgba(79, 70, 229, 0.2); animation: move 30s infinite alternate; animation-delay: -5s; }
+    .blob-3 { top: 20%; left: 50%; width: 300px; height: 300px; background: rgba(236, 72, 153, 0.15); animation: move 20s infinite alternate; animation-delay: -10s; }
+
+
+    /* --- Animated Borders & Text --- */
+    .animated-border-container { position: relative; padding: 3px; overflow: hidden; border-radius: 1.2rem; }
+    .animated-border-container::before {
+      content: ''; position: absolute; top: 50%; left: 50%; width: 200%; height: 200%;
+      background: conic-gradient(from 180deg at 50% 50%, #8B5CF6 0%, #EC4899 50%, #3B82F6 100%);
+      animation: rotate 4s linear infinite;
+      transform: translate(-50%, -50%); z-index: -1;
+    }
+    .animate-gradient-text { background-size: 200% auto; animation: textShine 5s linear infinite; }
+
+    /* --- Custom Dropdown --- */
+    .custom-select-wrapper { position: relative; }
+    .custom-select-trigger {
+        display: flex; justify-content: space-between; align-items: center;
+        padding: 0.75rem 1rem; border-radius: 0.375rem; background-color: #1f2937;
+        border: 1px solid #374151; cursor: pointer; transition: all 0.2s; box-shadow: inset 0 1px 2px rgba(0,0,0,0.3);
+    }
+    .custom-select-trigger:hover, .custom-select-wrapper.open .custom-select-trigger { border-color: #8b5cf6; }
+    .custom-options {
+        position: absolute; top: calc(100% + 8px); left: 0; right: 0;
+        background: rgba(31, 41, 55, 0.8); backdrop-filter: blur(10px);
+        border: 1px solid #4b5563; border-radius: 0.375rem;
+        z-index: 10; opacity: 0; pointer-events: none;
+        transform: scale(0.98) translateY(-10px); transition: all 0.2s ease-out;
+        max-height: 200px; overflow-y: auto;
+    }
+    .custom-options.open { opacity: 1; pointer-events: auto; transform: scale(1) translateY(0); }
+    .custom-option { padding: 0.75rem 1rem; cursor: pointer; transition: background-color 0.2s; display: flex; justify-content: space-between; align-items: center; }
+    .custom-option:hover { background-color: rgba(139, 92, 246, 0.3); }
+    .custom-option .info { color: #9ca3af; font-size: 0.8rem; }
+    
+    /* --- BEST Quality Badge --- */
+    .best-badge {
+        background-image: linear-gradient(to right, #a855f7, #ec4899);
+        padding: 2px 8px; border-radius: 9999px; color: white;
+        font-size: 0.65rem; font-weight: 700; line-height: 1; text-transform: uppercase;
+    }
+    
+    /* --- Enhanced Hover & Shimmer Effects --- */
+    #results-card-inner { transition: border-color 0.3s ease, box-shadow 0.3s ease; }
+    #results-card-inner:hover { border-color: rgba(168, 85, 247, 0.6); box-shadow: 0 0 25px rgba(168, 85, 247, 0.3); }
+    #thumbnail { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+    #results-card-inner:hover #thumbnail { transform: scale(1.05); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+
+    .shimmer-button { position: relative; overflow: hidden; }
+    .shimmer-button::before {
+        content: ''; position: absolute; top: 0;
+        width: 50px; height: 100%;
+        background: linear-gradient(to right, transparent 0%, rgba(255,255,255,0.2) 50%, transparent 100%);
+        transform: skewX(-25deg) translateX(-150px);
+        transition: transform 0.6s ease;
+    }
+    .shimmer-button:hover::before { transform: skewX(-25deg) translateX(350px); }
+
+    /* --- Keyframes --- */
+    @keyframes move { from { transform: translate(0, 0) rotate(0deg) scale(1); } to { transform: translate(100px, 50px) rotate(90deg) scale(1.2); } }
+    @keyframes rotate { 100% { transform: translate(-50%, -50%) rotate(360deg); } }
+    @keyframes textShine { to { background-position: 200% center; } }
+    .animate-fade-in-up { animation: fadeInUp 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
+  <div id="background-mesh">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+      <div class="blob blob-3"></div>
+  </div>
+
+  <div class="w-full max-w-2xl">
+    <div class="text-center mb-8">
+        <h1 class="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 animate-gradient-text">
+            YouTube A/V Downloader
+        </h1>
+        <p class="text-gray-400 mt-2 text-sm sm:text-base tracking-wider">Your portal to offline YouTube content.</p>
+    </div>
+
+    <div id="input-section" class="animated-border-container">
+      <div class="w-full bg-gray-900 backdrop-blur-2xl rounded-2xl p-6 sm:p-8 shadow-2xl shadow-purple-900/20">
+        <div class="flex flex-col sm:flex-row gap-3">
+          <input type="text" id="urlInput" placeholder="Paste your YouTube link here..."
+                 class="w-full appearance-none px-5 py-3 rounded-lg bg-gray-800/80 text-white placeholder-gray-500 border border-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none focus:shadow-lg focus:shadow-purple-500/20 transition-all duration-300">
+          <button id="fetchButton" onclick="fetchInfo()"
+                  class="px-6 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 transform hover:scale-[1.03] transition-all duration-300 text-white font-semibold shadow-lg hover:shadow-xl shadow-purple-500/20 hover:shadow-purple-500/30 flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:scale-100">
+            <span id="fetchButtonText">Fetch</span>
+            <svg id="fetchSpinner" class="animate-spin h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+          </button>
+        </div>
+        <p id="status-text" class="text-center text-gray-400 pt-4 min-h-[24px] transition-colors duration-300"></p>
+      </div>
+    </div>
+
+    <div id="results-area" class="hidden mt-8">
+        <div id="results-card-inner" class="bg-gray-900/80 backdrop-blur-2xl border border-purple-500/30 rounded-2xl shadow-2xl shadow-purple-900/20 p-5 sm:p-6 flex flex-col md:flex-row gap-5">
+            <img id="thumbnail" src="" alt="Video Thumbnail" class="w-full md:w-48 h-auto object-cover rounded-lg aspect-video md:aspect-auto border border-gray-700">
+            <div class="w-full space-y-4">
+                <div>
+                    <h2 id="video-title" class="text-xl font-bold text-white leading-tight"></h2>
+                    <div class="flex items-center text-sm text-gray-400 mt-1"><span id="channel-name"></span><span class="mx-2">•</span><span id="video-duration"></span></div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium text-gray-300 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-cyan-400" viewBox="0 0 20 20" fill="currentColor"><path d="M2 6a2 2 0 012-2h6a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V6zM14.553 7.106A1 1 0 0014 8v4a1 1 0 001.553.832l3-2a1 1 0 000-1.664l-3-2z" /></svg>
+                            Video (MP4)
+                        </label>
+                        <div class="custom-select-wrapper" id="video-select-wrapper">
+                            <div class="custom-select-trigger"><span>Select quality</span><svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                            <div class="custom-options"></div>
+                        </div>
+                        <button onclick="downloadSelected('video')" class="shimmer-button mt-1 w-full p-2.5 rounded-md bg-cyan-600/50 hover:bg-cyan-600/80 transition-all duration-300 text-white font-semibold shadow-[0_0_20px_rgba(45,212,191,0.1)] hover:shadow-[0_0_25px_rgba(45,212,191,0.3)] disabled:opacity-50"><span>Download Video</span></button>
+                    </div>
+                    <div class="space-y-2">
+                         <label class="text-sm font-medium text-gray-300 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-pink-400" viewBox="0 0 20 20" fill="currentColor"><path d="M18 3a1 1 0 00-1.196-.98l-10 2A1 1 0 006 5v9.114A4.369 4.369 0 005 14c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3V7.82l8-1.6v5.894A4.37 4.37 0 0015 12c-1.657 0-3 1.343-3 3s1.343 3 3 3 3-1.343 3-3V3z" /></svg>
+                            Audio (MP3)
+                        </label>
+                        <div class="custom-select-wrapper" id="audio-select-wrapper">
+                            <div class="custom-select-trigger"><span>Select quality</span><svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg></div>
+                            <div class="custom-options"></div>
+                        </div>
+                        <button onclick="downloadSelected('audio')" class="shimmer-button mt-1 w-full p-2.5 rounded-md bg-pink-600/50 hover:bg-pink-600/80 transition-all duration-300 text-white font-semibold shadow-[0_0_20px_rgba(236,72,153,0.1)] hover:shadow-[0_0_25px_rgba(236,72,153,0.3)] disabled:opacity-50"><span>Download Audio</span></button>
+                    </div>
+                </div>
+            </div>
+        </div>
+      <button onclick="resetUI()" class="mt-4 block mx-auto text-gray-500 hover:text-white transition-colors text-sm">Download Another Video →</button>    </div>
+  </div>
+
+<script>
+    const API_BASE = "http://127.0.0.1:8000";
+    let currentUrl = "";
+
+    const urlInput = document.getElementById("urlInput");
+    const fetchButton = document.getElementById("fetchButton");
+    const fetchButtonText = document.getElementById("fetchButtonText");
+    const fetchSpinner = document.getElementById("fetchSpinner");
+    const statusText = document.getElementById("status-text");
+    
+    const resultsArea = document.getElementById("results-area");
+    const thumbnail = document.getElementById("thumbnail");
+    const videoTitle = document.getElementById("video-title");
+    const channelName = document.getElementById("channel-name");
+    const videoDuration = document.getElementById("video-duration");
+
+    function setupCustomDropdowns() {
+        document.querySelectorAll('.custom-select-wrapper').forEach(wrapper => {
+            const trigger = wrapper.querySelector('.custom-select-trigger');
+            const options = wrapper.querySelector('.custom-options');
+            
+            trigger.addEventListener('click', () => {
+                const isOpen = options.classList.contains('open');
+                document.querySelectorAll('.custom-options').forEach(o => o.classList.remove('open'));
+                if (!isOpen) {
+                    options.classList.add('open');
+                    wrapper.classList.add('open');
+                }
+            });
+        });
+    }
+
+    window.addEventListener('click', (e) => {
+        if (!e.target.closest('.custom-select-wrapper')) {
+            document.querySelectorAll('.custom-options').forEach(o => {
+                o.classList.remove('open');
+                o.parentElement.classList.remove('open');
+            });
+        }
+    });
+
+    function populateResults(data) {
+        thumbnail.src = data.thumbnail;
+        videoTitle.textContent = data.title;
+        channelName.textContent = data.uploader;
+        videoDuration.textContent = data.duration_string;
+
+        const videoWrapper = document.getElementById('video-select-wrapper');
+        const audioWrapper = document.getElementById('audio-select-wrapper');
+        const videoOptions = videoWrapper.querySelector('.custom-options');
+        const audioOptions = audioWrapper.querySelector('.custom-options');
+        
+        videoOptions.innerHTML = '';
+        audioOptions.innerHTML = '';
+        
+        videoWrapper.querySelector('span').textContent = 'Select quality';
+        audioWrapper.querySelector('span').textContent = 'Select quality';
+        videoWrapper.dataset.selectedValue = '';
+        audioWrapper.dataset.selectedValue = '';
+
+        const videos = Array.from(new Map(data.formats.filter(f => f.vcodec !== 'none' && f.height).map(v => [v.height, v])).values())
+            .sort((a, b) => b.height - a.height || (b.fps || 0) - (a.fps || 0));
+            
+        videos.forEach((f, index) => {
+            const isBest = index === 0;
+            const badgeHTML = isBest ? '<span class="best-badge">BEST</span>' : '';
+            const size = f.filesize || f.filesize_approx;
+            const sizeText = size ? `${(size / 1024 / 1024).toFixed(1)} MB` : '';
+            const fpsText = f.fps ? `@${f.fps}fps` : '';
+            const optionEl = document.createElement('div');
+            optionEl.classList.add('custom-option');
+            optionEl.dataset.value = f.format_id;
+            optionEl.innerHTML = `<div class="flex items-center gap-2"><span>${f.height}p ${fpsText}</span>${badgeHTML}</div><span class="info">${sizeText}</span>`;
+            videoOptions.appendChild(optionEl);
+        });
+
+        const audios = Array.from(new Map(data.formats.filter(f => f.vcodec === 'none' && f.abr).map(a => [Math.round(a.abr), a])).values())
+            .sort((a, b) => b.abr - a.abr);
+            
+        audios.forEach((f, index) => {
+            const isBest = index === 0;
+            const badgeHTML = isBest ? '<span class="best-badge">BEST</span>' : '';
+            const size = f.filesize || f.filesize_approx;
+            const sizeText = size ? `${(size / 1024 / 1024).toFixed(1)} MB` : '';
+            const optionEl = document.createElement('div');
+            optionEl.classList.add('custom-option');
+            optionEl.dataset.value = f.format_id;
+            optionEl.innerHTML = `<div class="flex items-center gap-2"><span>~${Math.round(f.abr)} kbps</span>${badgeHTML}</div><span class="info">${sizeText}</span>`;
+            audioOptions.appendChild(optionEl);
+        });
+
+        document.querySelectorAll('.custom-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const wrapper = option.closest('.custom-select-wrapper');
+                wrapper.querySelector('.custom-select-trigger span').textContent = option.querySelector('.flex span').textContent;
+                wrapper.dataset.selectedValue = option.dataset.value;
+                wrapper.querySelector('.custom-options').classList.remove('open');
+                wrapper.classList.remove('open');
+            });
+        });
+
+        if (videos.length > 0) {
+            const bestVideo = videos[0];
+            videoWrapper.querySelector('span').textContent = `${bestVideo.height}p ${bestVideo.fps ? '@'+bestVideo.fps+'fps' : ''}`;
+            videoWrapper.dataset.selectedValue = bestVideo.format_id;
+        }
+        if (audios.length > 0) {
+            const bestAudio = audios[0];
+            audioWrapper.querySelector('span').textContent = `~${Math.round(bestAudio.abr)} kbps`;
+            audioWrapper.dataset.selectedValue = bestAudio.format_id;
+        }
+    }
+    
+    async function fetchInfo() {
+      const url = urlInput.value.trim();
+      if (!url) { 
+          statusText.textContent = "Please provide a valid YouTube URL."; 
+          statusText.classList.add('text-yellow-400'); 
+          return; 
+      }
+      currentUrl = url;
+      setLoadingState(true);
+      statusText.textContent = "Inspecting link...";
+      statusText.classList.remove('text-yellow-400', 'text-red-400');
+      resultsArea.classList.add("hidden");
+
+      try {
+        const res = await fetch(`${API_BASE}/fetch?url=${encodeURIComponent(url)}`);
+        if (!res.ok) { 
+            const errorData = await res.json().catch(() => ({ detail: "Failed to fetch details." })); 
+            throw new Error(errorData.detail || `Server error: ${res.status}`); 
+        }
+        const data = await res.json();
+        populateResults(data);
+        resultsArea.classList.remove("hidden");
+        resultsArea.classList.add("animate-fade-in-up");
+        statusText.textContent = '';
+      } catch (err) { 
+          statusText.textContent = `Error: ${err.message}`; 
+          statusText.classList.add('text-red-400'); 
+      } finally { 
+          setLoadingState(false); 
+      }
+    }
+
+    function resetUI() {
+        resultsArea.classList.add("hidden");
+        resultsArea.classList.remove("animate-fade-in-up");
+        urlInput.value = '';
+        statusText.textContent = '';
+        urlInput.focus();
+    };
+
+    function setLoadingState(isLoading) {
+      fetchButton.disabled = isLoading;
+      fetchButtonText.classList.toggle('hidden', isLoading);
+      fetchSpinner.classList.toggle('hidden', !isLoading);
+    };
+    
+    function downloadSelected(type) {
+        const wrapper = document.getElementById(`${type}-select-wrapper`);
+        const buttonElement = wrapper.parentElement.querySelector('button');
+        const format_id = wrapper.dataset.selectedValue;
+        if (!format_id) { 
+            alert('Please select a quality first.'); 
+            return; 
+        }
+        
+        const downloadUrl = type === 'video' ? `${API_BASE}/download?url=${encodeURIComponent(currentUrl)}&format_id=${format_id}` : `${API_BASE}/download?url=${encodeURIComponent(currentUrl)}&format_id=${format_id}&as_mp3=true`;
+        window.open(downloadUrl, "_blank");
+
+        const originalText = buttonElement.querySelector('span').textContent;
+        buttonElement.querySelector('span').innerHTML = `<div class="flex items-center justify-center"><svg class="animate-spin -ml-1 mr-2 h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>Starting...</div>`;
+        buttonElement.disabled = true;
+
+        setTimeout(() => { 
+            buttonElement.querySelector('span').textContent = originalText; 
+            buttonElement.disabled = false; 
+        }, 2000);
+    }
+    
+    document.addEventListener('DOMContentLoaded', setupCustomDropdowns);
+</script>
+</body>
+</html>
