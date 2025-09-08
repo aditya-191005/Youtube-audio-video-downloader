@@ -4,7 +4,7 @@ A full-stack project using **FastAPI** and **yt-dlp** that lets you paste a YouT
 
 ### How to Run
 
-1. Clone repo → `git clone https://github.com/your-username/youtube-downloader.git`
+1. Clone repo → `git clone https://github.com/aditya-191005/Youtube-audio-video-downloader.git`
 2. Create venv → `python -m venv venv && source venv/bin/activate` (or `venv\Scripts\activate` on Windows)
 3. Install → `pip install -r requirements.txt`
 4. Start backend → `uvicorn app:app --reload` (API runs at `http://127.0.0.1:8000`)
