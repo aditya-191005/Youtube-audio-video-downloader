@@ -11,5 +11,6 @@ A full-stack project using **FastAPI** and **yt-dlp** that lets you paste a YouT
 5. Open `index.html` in browser to use the frontend.
 
 ⚠️ **Disclaimer**: For educational purposes only. Do not use to download copyrighted material.
-**Note**: [ffmpeg](https://ffmpeg.org/download.html) (required for MP3/audio conversion)
+
+⚠️ **Note**: [ffmpeg](https://ffmpeg.org/download.html) (required for MP3/audio conversion)
 
