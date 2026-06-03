@@ -4,6 +4,8 @@
   <meta charset="UTF-8" />
   <title>YouTube A/V Downloader</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+  <meta name="description" content="Download YouTube videos and audio instantly. Vercel compatible, fast and secure.">
 
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -209,43 +211,32 @@
     .shimmer-button:hover::before {
       transform: skewX(-25deg) translateX(350px);
     }
+    
+    .shimmer-button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
 
     @keyframes move {
-      from {
-        transform: translate(0, 0) rotate(0deg) scale(1);
-      }
-      to {
-        transform: translate(100px, 50px) rotate(90deg) scale(1.2);
-      }
+      from { transform: translate(0, 0) rotate(0deg) scale(1); }
+      to { transform: translate(100px, 50px) rotate(90deg) scale(1.2); }
     }
 
     @keyframes rotate {
-      100% {
-        transform: translate(-50%, -50%) rotate(360deg);
-      }
+      100% { transform: translate(-50%, -50%) rotate(360deg); }
     }
 
     @keyframes textShine {
-      to {
-        background-position: 200% center;
-      }
+      to { background-position: 200% center; }
     }
 
     @keyframes fadeInUp {
-      from {
-        opacity: 0;
-        transform: translateY(30px);
-      }
-
-      to {
-        opacity: 1;
-        transform: translateY(0);
-      }
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
     }
 
     .animate-fade-in-up {
-      animation: fadeInUp 0.6s cubic-bezier(0.25, 1, 0.5, 1)
-        forwards;
+      animation: fadeInUp 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards;
     }
   </style>
 </head>
@@ -258,183 +249,97 @@
     <div class="blob blob-3"></div>
   </div>
 
-  <div class="w-full max-w-2xl">
+  <div class="w-full max-w-2xl z-10">
 
     <div class="text-center mb-8">
-      <h1
-        class="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 animate-gradient-text"
-      >
+      <h1 class="text-3xl sm:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 via-pink-400 to-indigo-400 animate-gradient-text">
         YouTube A/V Downloader
       </h1>
-
-      <p
-        class="text-gray-400 mt-2 text-sm sm:text-base tracking-wider"
-      >
-        Download YouTube videos and audio instantly.
+      <p class="text-gray-400 mt-2 text-sm sm:text-base tracking-wider">
+        Download YouTube videos and audio instantly, anywhere.
       </p>
     </div>
 
     <div id="input-section" class="animated-border-container">
-      <div
-        class="w-full bg-gray-900 backdrop-blur-2xl rounded-2xl p-6 sm:p-8 shadow-2xl shadow-purple-900/20"
-      >
+      <div class="w-full bg-gray-900 backdrop-blur-2xl rounded-2xl p-6 sm:p-8 shadow-2xl shadow-purple-900/20">
 
-        <div class="flex flex-col sm:flex-row gap-3">
-
+        <form id="fetchForm" class="flex flex-col sm:flex-row gap-3">
           <input
-            type="text"
+            type="url"
             id="urlInput"
+            required
+            pattern="^(https?\:\/\/)?(www\.youtube\.com|youtu\.?be)\/.+$"
             placeholder="Paste your YouTube link here..."
-            class="w-full appearance-none px-5 py-3 rounded-lg bg-gray-800/80 text-white placeholder-gray-500 border border-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none"
+            class="w-full appearance-none px-5 py-3 rounded-lg bg-gray-800/80 text-white placeholder-gray-500 border border-gray-700 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 focus:outline-none transition-colors"
           />
 
           <button
+            type="submit"
             id="fetchButton"
-            onclick="fetchInfo()"
-            class="px-6 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold transition-all duration-300"
+            class="px-6 py-3 rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold transition-all duration-300 disabled:opacity-50 flex items-center justify-center min-w-[120px]"
           >
             <span id="fetchButtonText">Fetch</span>
 
-            <svg
-              id="fetchSpinner"
-              class="animate-spin h-5 w-5 text-white hidden"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                class="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                stroke-width="4"
-              ></circle>
-
-              <path
-                class="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"
-              ></path>
+            <svg id="fetchSpinner" class="animate-spin h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
             </svg>
           </button>
-        </div>
+        </form>
 
-        <p
-          id="status-text"
-          class="text-center text-gray-400 pt-4 min-h-[24px]"
-        ></p>
+        <p id="status-text" class="text-center text-red-400 pt-4 min-h-[24px] text-sm"></p>
       </div>
     </div>
 
     <div id="results-area" class="hidden mt-8">
 
-      <div
-        class="bg-gray-900/80 backdrop-blur-2xl border border-purple-500/30 rounded-2xl p-5 sm:p-6 flex flex-col md:flex-row gap-5"
-      >
+      <div class="bg-gray-900/80 backdrop-blur-2xl border border-purple-500/30 rounded-2xl p-5 sm:p-6 flex flex-col md:flex-row gap-5">
 
-        <img
-          id="thumbnail"
-          src=""
-          alt="Thumbnail"
-          class="w-full md:w-48 rounded-lg aspect-video object-cover"
-        />
+        <img id="thumbnail" src="" alt="Thumbnail" class="w-full md:w-48 rounded-lg aspect-video object-cover shadow-lg" />
 
         <div class="w-full space-y-4">
 
           <div>
-            <h2
-              id="video-title"
-              class="text-xl font-bold text-white"
-            ></h2>
-
+            <h2 id="video-title" class="text-xl font-bold text-white line-clamp-2"></h2>
             <div class="flex items-center text-sm text-gray-400 mt-1">
-              <span id="channel-name"></span>
+              <span id="channel-name" class="font-medium"></span>
               <span class="mx-2">•</span>
               <span id="video-duration"></span>
             </div>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
+            
             <!-- VIDEO -->
             <div class="space-y-2">
-
-              <label class="text-sm text-gray-300">
-                Video (MP4)
-              </label>
-
-              <div
-                class="custom-select-wrapper"
-                id="video-select-wrapper"
-              >
-
+              <label class="text-sm text-gray-300 font-medium">Video (MP4/WebM)</label>
+              <div class="custom-select-wrapper" id="video-select-wrapper">
                 <div class="custom-select-trigger">
-                  <span>Select quality</span>
-
-                  <svg
-                    class="w-5 h-5 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M19 9l-7 7-7-7"
-                    ></path>
+                  <span class="truncate">Select quality</span>
+                  <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                   </svg>
                 </div>
-
                 <div class="custom-options"></div>
               </div>
-
-              <button
-                onclick="downloadSelected('video')"
-                class="shimmer-button w-full p-2.5 rounded-md bg-cyan-600 hover:bg-cyan-500 text-white font-semibold"
-              >
+              <button onclick="downloadSelected('video')" id="btn-video" class="shimmer-button w-full p-2.5 rounded-md bg-cyan-600 hover:bg-cyan-500 text-white font-semibold transition-colors flex justify-center items-center gap-2">
                 Download Video
               </button>
             </div>
 
             <!-- AUDIO -->
             <div class="space-y-2">
-
-              <label class="text-sm text-gray-300">
-                Audio (MP3)
-              </label>
-
-              <div
-                class="custom-select-wrapper"
-                id="audio-select-wrapper"
-              >
-
+              <label class="text-sm text-gray-300 font-medium">Audio (M4A/WebM)</label>
+              <div class="custom-select-wrapper" id="audio-select-wrapper">
                 <div class="custom-select-trigger">
-                  <span>Select quality</span>
-
-                  <svg
-                    class="w-5 h-5 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                      stroke-width="2"
-                      d="M19 9l-7 7-7-7"
-                    ></path>
+                  <span class="truncate">Select quality</span>
+                  <svg class="w-5 h-5 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
                   </svg>
                 </div>
-
                 <div class="custom-options"></div>
               </div>
-
-              <button
-                onclick="downloadSelected('audio')"
-                class="shimmer-button w-full p-2.5 rounded-md bg-pink-600 hover:bg-pink-500 text-white font-semibold"
-              >
+              <button onclick="downloadSelected('audio')" id="btn-audio" class="shimmer-button w-full p-2.5 rounded-md bg-pink-600 hover:bg-pink-500 text-white font-semibold transition-colors flex justify-center items-center gap-2">
                 Download Audio
               </button>
             </div>
@@ -443,22 +348,19 @@
         </div>
       </div>
 
-      <button
-        onclick="resetUI()"
-        class="mt-4 block mx-auto text-gray-500 hover:text-white transition-colors text-sm"
-      >
-        Download Another Video →
+      <button onclick="resetUI()" class="mt-6 block mx-auto text-gray-400 hover:text-white transition-colors text-sm font-medium">
+        ← Download Another Video
       </button>
     </div>
   </div>
 
 <script>
-  // IMPORTANT:
-  // Empty string means same domain as backend
-  const API_BASE = "";
+  // Vercel deployment will route requests properly to /api/index.py
+  const API_BASE = ""; 
 
   let currentUrl = "";
 
+  const form = document.getElementById("fetchForm");
   const urlInput = document.getElementById("urlInput");
   const fetchButton = document.getElementById("fetchButton");
   const fetchButtonText = document.getElementById("fetchButtonText");
@@ -472,276 +374,208 @@
   const videoDuration = document.getElementById("video-duration");
 
   function setupCustomDropdowns() {
-    document
-      .querySelectorAll(".custom-select-wrapper")
-      .forEach((wrapper) => {
-        const trigger =
-          wrapper.querySelector(".custom-select-trigger");
+    document.querySelectorAll(".custom-select-wrapper").forEach((wrapper) => {
+      const trigger = wrapper.querySelector(".custom-select-trigger");
+      const options = wrapper.querySelector(".custom-options");
 
-        const options =
-          wrapper.querySelector(".custom-options");
-
-        trigger.addEventListener("click", () => {
-          const isOpen =
-            options.classList.contains("open");
-
-          document
-            .querySelectorAll(".custom-options")
-            .forEach((o) => o.classList.remove("open"));
-
-          if (!isOpen) {
-            options.classList.add("open");
-            wrapper.classList.add("open");
-          }
-        });
+      trigger.addEventListener("click", () => {
+        const isOpen = options.classList.contains("open");
+        document.querySelectorAll(".custom-options").forEach((o) => o.classList.remove("open"));
+        if (!isOpen) {
+          options.classList.add("open");
+          wrapper.classList.add("open");
+        }
       });
+    });
   }
 
   window.addEventListener("click", (e) => {
     if (!e.target.closest(".custom-select-wrapper")) {
-      document
-        .querySelectorAll(".custom-options")
-        .forEach((o) => {
-          o.classList.remove("open");
-          o.parentElement.classList.remove("open");
-        });
+      document.querySelectorAll(".custom-options").forEach((o) => {
+        o.classList.remove("open");
+        o.parentElement.classList.remove("open");
+      });
     }
   });
 
-  function populateResults(data) {
+  function formatBytes(bytes, decimals = 2) {
+    if (!+bytes) return 'Unknown size';
+    const k = 1024;
+    const dm = decimals < 0 ? 0 : decimals;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+  }
 
+  function populateResults(data) {
     thumbnail.src = data.thumbnail;
     videoTitle.textContent = data.title;
     channelName.textContent = data.uploader;
-    videoDuration.textContent =
-      data.duration_string;
+    videoDuration.textContent = data.duration_string || "";
 
-    const videoWrapper =
-      document.getElementById(
-        "video-select-wrapper"
-      );
-
-    const audioWrapper =
-      document.getElementById(
-        "audio-select-wrapper"
-      );
-
-    const videoOptions =
-      videoWrapper.querySelector(".custom-options");
-
-    const audioOptions =
-      audioWrapper.querySelector(".custom-options");
+    const videoWrapper = document.getElementById("video-select-wrapper");
+    const audioWrapper = document.getElementById("audio-select-wrapper");
+    const videoOptions = videoWrapper.querySelector(".custom-options");
+    const audioOptions = audioWrapper.querySelector(".custom-options");
 
     videoOptions.innerHTML = "";
     audioOptions.innerHTML = "";
 
+    // Video: Has both height and video codec
     const videos = data.formats
       .filter((f) => f.vcodec !== "none" && f.height)
       .sort((a, b) => b.height - a.height);
 
     videos.forEach((f, index) => {
-
       const option = document.createElement("div");
-
       option.classList.add("custom-option");
-
       option.dataset.value = f.format_id;
-
-      const best =
-        index === 0
-          ? '<span class="best-badge">BEST</span>'
-          : "";
+      
+      const best = index === 0 ? '<span class="best-badge ml-2">BEST</span>' : "";
+      const sizeStr = f.filesize ? formatBytes(f.filesize) : (f.filesize_approx ? formatBytes(f.filesize_approx) : '');
+      const sizeHtml = sizeStr ? `<span class="info">${sizeStr}</span>` : '';
 
       option.innerHTML = `
-        <div class="flex items-center gap-2">
-          <span>${f.height}p</span>
+        <div class="flex items-center">
+          <span>${f.height}p <span class="text-xs text-gray-500">(${f.ext})</span></span>
           ${best}
         </div>
+        ${sizeHtml}
       `;
-
       videoOptions.appendChild(option);
     });
 
+    // Audio: No video codec, has average bitrate or audio codec
     const audios = data.formats
-      .filter((f) => f.vcodec === "none" && f.abr)
-      .sort((a, b) => b.abr - a.abr);
+      .filter((f) => f.vcodec === "none" && (f.abr || f.acodec !== "none"))
+      .sort((a, b) => (b.abr || 0) - (a.abr || 0));
 
     audios.forEach((f, index) => {
-
       const option = document.createElement("div");
-
       option.classList.add("custom-option");
-
       option.dataset.value = f.format_id;
 
-      const best =
-        index === 0
-          ? '<span class="best-badge">BEST</span>'
-          : "";
+      const best = index === 0 ? '<span class="best-badge ml-2">BEST</span>' : "";
+      const sizeStr = f.filesize ? formatBytes(f.filesize) : (f.filesize_approx ? formatBytes(f.filesize_approx) : '');
+      const sizeHtml = sizeStr ? `<span class="info">${sizeStr}</span>` : '';
+      const abrStr = f.abr ? `${Math.round(f.abr)} kbps` : 'Audio';
 
       option.innerHTML = `
-        <div class="flex items-center gap-2">
-          <span>${Math.round(f.abr)} kbps</span>
+        <div class="flex items-center">
+          <span>${abrStr} <span class="text-xs text-gray-500">(${f.ext})</span></span>
           ${best}
         </div>
+        ${sizeHtml}
       `;
-
       audioOptions.appendChild(option);
     });
 
-    document
-      .querySelectorAll(".custom-option")
-      .forEach((option) => {
-
-        option.addEventListener("click", () => {
-
-          const wrapper =
-            option.closest(
-              ".custom-select-wrapper"
-            );
-
-          wrapper.querySelector(
-            ".custom-select-trigger span"
-          ).textContent =
-            option.querySelector("span")
-              .textContent;
-
-          wrapper.dataset.selectedValue =
-            option.dataset.value;
-
-          wrapper
-            .querySelector(".custom-options")
-            .classList.remove("open");
-        });
+    document.querySelectorAll(".custom-option").forEach((option) => {
+      option.addEventListener("click", () => {
+        const wrapper = option.closest(".custom-select-wrapper");
+        wrapper.querySelector(".custom-select-trigger span").innerHTML = option.querySelector("div").innerHTML;
+        wrapper.dataset.selectedValue = option.dataset.value;
+        wrapper.querySelector(".custom-options").classList.remove("open");
       });
+    });
 
     if (videos.length > 0) {
-      videoWrapper.dataset.selectedValue =
-        videos[0].format_id;
-
-      videoWrapper.querySelector(
-        ".custom-select-trigger span"
-      ).textContent = `${videos[0].height}p`;
+      videoWrapper.dataset.selectedValue = videos[0].format_id;
+      videoWrapper.querySelector(".custom-select-trigger span").innerHTML = `
+        ${videos[0].height}p <span class="text-xs text-gray-500">(${videos[0].ext})</span>
+      `;
     }
 
     if (audios.length > 0) {
-      audioWrapper.dataset.selectedValue =
-        audios[0].format_id;
-
-      audioWrapper.querySelector(
-        ".custom-select-trigger span"
-      ).textContent =
-        `${Math.round(audios[0].abr)} kbps`;
+      audioWrapper.dataset.selectedValue = audios[0].format_id;
+      const abrStr = audios[0].abr ? `${Math.round(audios[0].abr)} kbps` : 'Audio';
+      audioWrapper.querySelector(".custom-select-trigger span").innerHTML = `
+        ${abrStr} <span class="text-xs text-gray-500">(${audios[0].ext})</span>
+      `;
     }
   }
 
-  async function fetchInfo() {
-
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
     const url = urlInput.value.trim();
 
     if (!url) {
-      statusText.textContent =
-        "Please enter a YouTube URL.";
+      statusText.textContent = "Please enter a valid YouTube URL.";
+      statusText.className = "text-center text-red-400 pt-4 min-h-[24px] text-sm";
       return;
     }
 
     currentUrl = url;
-
     setLoadingState(true);
-
-    statusText.textContent =
-      "Fetching video information...";
-
+    
+    statusText.textContent = "Fetching video information...";
+    statusText.className = "text-center text-blue-400 pt-4 min-h-[24px] text-sm";
+    
     resultsArea.classList.add("hidden");
 
     try {
-
-      const res = await fetch(
-        `${API_BASE}/fetch?url=${encodeURIComponent(url)}`
-      );
-
+      const res = await fetch(`${API_BASE}/fetch?url=${encodeURIComponent(url)}`);
       const data = await res.json();
 
       if (!res.ok) {
-        throw new Error(
-          data.detail || "Failed to fetch."
-        );
+        throw new Error(data.detail || "Failed to fetch video data.");
       }
 
       populateResults(data);
-
       resultsArea.classList.remove("hidden");
-
-      resultsArea.classList.add(
-        "animate-fade-in-up"
-      );
-
+      resultsArea.classList.add("animate-fade-in-up");
       statusText.textContent = "";
 
     } catch (err) {
-
-      statusText.textContent =
-        "Error: " + err.message;
-
+      statusText.textContent = "Error: " + err.message;
+      statusText.className = "text-center text-red-400 pt-4 min-h-[24px] text-sm";
     } finally {
-
       setLoadingState(false);
     }
-  }
+  });
 
   function downloadSelected(type) {
-
-    const wrapper =
-      document.getElementById(
-        `${type}-select-wrapper`
-      );
-
-    const format_id =
-      wrapper.dataset.selectedValue;
+    const wrapper = document.getElementById(`${type}-select-wrapper`);
+    const format_id = wrapper.dataset.selectedValue;
+    const btn = document.getElementById(`btn-${type}`);
 
     if (!format_id) {
-      alert("Select a quality first.");
+      alert("Please select a quality format first.");
       return;
     }
 
-    const url =
-      type === "video"
-        ? `${API_BASE}/download?url=${encodeURIComponent(currentUrl)}&format_id=${format_id}`
-        : `${API_BASE}/download?url=${encodeURIComponent(currentUrl)}&format_id=${format_id}&as_mp3=true`;
+    // Set a brief visual feedback that download started
+    const originalText = btn.innerHTML;
+    btn.innerHTML = `<svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Starting...`;
+    btn.disabled = true;
 
-    window.open(url, "_blank");
+    setTimeout(() => {
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+    }, 2000);
+
+    const asAudio = type === "audio" ? "true" : "false";
+    const url = `${API_BASE}/download?url=${encodeURIComponent(currentUrl)}&format_id=${format_id}&as_audio=${asAudio}`;
+    
+    window.location.href = url; // Opens in same tab to trigger file download gracefully
   }
 
   function setLoadingState(isLoading) {
-
     fetchButton.disabled = isLoading;
-
-    fetchButtonText.classList.toggle(
-      "hidden",
-      isLoading
-    );
-
-    fetchSpinner.classList.toggle(
-      "hidden",
-      !isLoading
-    );
+    urlInput.disabled = isLoading;
+    fetchButtonText.classList.toggle("hidden", isLoading);
+    fetchSpinner.classList.toggle("hidden", !isLoading);
   }
 
   function resetUI() {
-
     resultsArea.classList.add("hidden");
-
     urlInput.value = "";
-
     statusText.textContent = "";
-
     currentUrl = "";
+    urlInput.focus();
   }
 
-  document.addEventListener(
-    "DOMContentLoaded",
-    setupCustomDropdowns
-  );
+  document.addEventListener("DOMContentLoaded", setupCustomDropdowns);
 </script>
 
 </body>
